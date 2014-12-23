@@ -1,0 +1,47 @@
+{
+  "name": "r3test",
+  "version": "0.1.0-EXPERIMENTAL",
+  "description": "Sample/test project for react-three",
+  "keywords": [
+    "react",
+    "threejs",
+    "webGL",
+    "canvas"
+  ],
+  "author": {
+    "name": "Gary Haussmann",
+    "email": "gjhaussmann@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Izzimach/r3test"
+  },
+  "license": "Apache-2.0",
+  "main": "r3test.js",
+  "dependencies": {
+    "react-three" : "0.1.0-EXPERIMENTAL",
+    "react": "^0.12.2"
+  },
+  "devDependencies": {
+    "http": "0.0.0",
+    "node-static": "~0.7.3",
+    "gulp": "~3.6.0",
+    "vinyl-source-stream": "~0.1.1",
+    "browserify": "~4.1.0",
+    "gulp-streamify": "0.0.5",
+    "gulp-jshint": "~1.5.1",
+    "gulp-livereload": "~1.2.0",
+    "jshint-stylish": "~0.1.5",
+    "gulp-util": "~2.2.14",
+    "gulp-header": "~1.0.2",
+    "gulp-uglify": "~0.2.1",
+    "gulp-rename": "~1.2.0",
+    "gulp-concat": "~2.2.0"
+  },
+  "scripts": {
+    "test": "gulp test"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
