@@ -19,8 +19,8 @@
   "license": "Apache-2.0",
   "main": "r3test.js",
   "dependencies": {
-    "react-three" : "0.1.0-EXPERIMENTAL",
-    "react": "^0.12.2"
+    "react-three": "~0.1.1-EXPERIMENTAL",
+    "react": "~0.12.2"
   },
   "devDependencies": {
     "http": "0.0.0",
