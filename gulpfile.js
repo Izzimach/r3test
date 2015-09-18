@@ -16,7 +16,6 @@ var streamify = require('gulp-streamify');
 var jshint = require('gulp-jshint');
 var livereload = require('gulp-livereload');
 var gutil = require('gulp-util');
-var header = require('gulp-header');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 
