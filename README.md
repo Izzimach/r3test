@@ -9,7 +9,7 @@ Checkout this repo from git, then
 
 ```
 npm install
-gulp livereload
+npm run dev
 ```
 
 And point your browser at `localhost:8080`

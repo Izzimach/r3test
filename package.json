@@ -1,6 +1,6 @@
 {
   "name": "r3test",
-  "version": "0.1.0-EXPERIMENTAL",
+  "version": "0.2.0-EXPERIMENTAL",
   "description": "Sample/test project for react-three",
   "keywords": [
     "react",
@@ -19,29 +19,25 @@
   "license": "Apache-2.0",
   "main": "r3test.js",
   "dependencies": {
-    "react-three": "~0.1.1-EXPERIMENTAL",
-    "react": "~0.12.2"
+    "react-three": "file:../react-three",
+    "react": "~0.13.3",
+    "three": "^0.70.1"
   },
   "devDependencies": {
-    "http": "0.0.0",
-    "node-static": "~0.7.3",
-    "gulp": "~3.6.0",
-    "vinyl-source-stream": "~0.1.1",
-    "browserify": "~4.1.0",
-    "gulp-streamify": "0.0.5",
-    "gulp-jshint": "~1.5.1",
-    "gulp-livereload": "~1.2.0",
-    "jshint-stylish": "~0.1.5",
-    "gulp-util": "~2.2.14",
-    "gulp-header": "~1.0.2",
-    "gulp-uglify": "~0.2.1",
-    "gulp-rename": "~1.2.0",
-    "gulp-concat": "~2.2.0"
+    "babel-core": "^5.8.23",
+    "babel-eslint": "^4.1.1",
+    "babel-loader": "^5.3.2",
+    "babel-runtime": "^5.8.20",
+    "eslint": "^1.4.0",
+    "lodash": "^3.3.1",
+    "webpack": "^1.12.1",
+    "webpack-dev-server": "^1.10.1"
   },
   "scripts": {
-    "test": "gulp test"
+    "build": "webpack",
+    "dev": "webpack-dev-server --progress --colors"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=0.12.0"
   }
 }

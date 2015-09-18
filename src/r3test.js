@@ -7,6 +7,7 @@
 
 var React = require('react');
 var ReactTHREE = require('react-three');
+var THREE = require('three');
 
 var g_assetpath = function(filename) { return 'assets/' + filename; };
 
@@ -29,10 +30,6 @@ var g_applicationstate = {};
 var g_nextcubeid = 1;
 
 // if the application state is modified call this to update the GUI
-
-function updateApp() {
-  g_reactinstance.setProps(g_applicationstate);
-}
 
 //
 // callback which adds a randomly placed cube to the application state
@@ -62,7 +59,7 @@ function addRandomCube() {
   g_applicationstate.cubes.push(newcube);
 
   // update and re-render
-  updateApp();
+  renderApp();
 }
 
 //
@@ -73,11 +70,8 @@ function removeCubeById(cubeid) {
   var isthecube = function(cube) { return cube.key === cubeid; };
   _.remove(g_applicationstate.cubes, isthecube);
 
-  updateApp();
+  renderApp();
 }
-
-
-
 
 //
 // React Components follow
@@ -120,7 +114,7 @@ var ClickableCube = React.createClass({
     var cubeprops = _.clone(this.props);
     cubeprops.geometry = boxgeometry;
     cubeprops.material = boxmaterial;
-    return ReactTHREE.Mesh(cubeprops);
+    return React.createElement(ReactTHREE.Mesh, cubeprops);
   }
 });
 
@@ -138,7 +132,7 @@ var ClickToRemoveCube = React.createClass({
     var cubeprops = _.clone(this.props);
     cubeprops.materialname = 'lollipopGreen.png';
     cubeprops.onPick = this.removeThisCube;
-    return ClickableCube(cubeprops);
+    return React.createElement(ClickableCube,cubeprops);
   }
 });
 
@@ -155,9 +149,10 @@ var CubeAppButtons = React.createClass({
     addRandomCube();
   },
   render: function() {
-    return ReactTHREE.Object3D(
-      {},
-      ClickableCube({position: new THREE.Vector3(0,0,0), materialname:'cherry.png', name:'addbutton', onPick:this.handlePick})
+    return React.createElement(ReactTHREE.Object3D,
+			       {},
+			       React.createElement(ClickableCube,
+						   {position: new THREE.Vector3(0,0,0), materialname:'cherry.png', name:'addbutton', onPick:this.handlePick})
     );
   }
 });
@@ -169,16 +164,16 @@ var CubeAppButtons = React.createClass({
 
 var RemovableCubes = React.createClass({
   displayName:'RemoveableCubes',
-  propsTypes: {
+  propTypes: {
     cubes: React.PropTypes.arrayOf(React.PropTypes.object)
   },
   render: function() {
     // props for the Object3D containing the cubes. You could change these
     // props to translate/rotate/scale the whole group of cubes at once
     var containerprops = {};
-    var args = [containerprops];
-    _.forEach(this.props.cubes, function(cube) { args.push(ClickToRemoveCube(cube));});
-    return ReactTHREE.Object3D.apply(null,args);
+    var args = [ReactTHREE.Object3D, containerprops];
+    _.forEach(this.props.cubes, function(cube) { args.push(React.createElement(ClickToRemoveCube,cube));});
+    return React.createElement.apply(null,args);
   }
 });
 
@@ -243,28 +238,29 @@ var CubeApp = React.createClass({
     window.removeEventListener('resize',this.state.resizecallback);
   },
   render: function() {
-    return ReactTHREE.Scene(
+    return React.createElement(ReactTHREE.Scene,
       // stage props
-      {width: this.state.width, height: this.state.height, camera:this.state.camera},
-      // children components are the buttons and the dynamic sprites
-      [
-        RemovableCubes({key:'cubes', cubes:this.props.cubes}),
-        CubeAppButtons({key:'gui'})
-      ]
-    );
+			       {width: this.state.width, height: this.state.height, listenToClick:true, camera:this.state.camera},
+			       // children components are the buttons and the dynamic sprites
+			       React.createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
+			       React.createElement(CubeAppButtons, {key:'gui'})
+			      );
   }
 });
 
 
 
-/* jshint unused:false */
-function r3teststart() {
-
+function renderApp() {
   var renderelement = document.getElementById("three-box");
+  React.render(React.createElement(CubeApp,g_applicationstate), renderelement);
+}
+
+
+function r3teststart() {
 
   g_applicationstate = {borderpx:6, cubes:[], xsize:500, ysize:500, zsize:500 };
 
-  g_reactinstance = React.renderComponent(CubeApp(g_applicationstate), renderelement);
+  renderApp();
 }
 
 window.onload = r3teststart;
