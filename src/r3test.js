@@ -5,50 +5,74 @@
 /* global _ : false */
 /* jshint strict: false */
 
-var React = require('react');
+import { createClass, createElement, PropTypes } from 'react';
+import { render, Mesh, Object3D, Scene } from 'react-three';
 var ReactTHREE = require('react-three');
 var THREE = require('three');
 
-var g_assetpath = function(filename) { return 'assets/' + filename; };
+import { createStore } from 'redux';
+import { Provider, connect } from 'react-redux';
 
+var g_assetpath = function(filename) { return 'assets/' + filename; };
 
 //
 // This 'application' tracks a bunch of cubes.
 // You can do two things:
+//
 // 1. add a new randomly-placed cube to the application state
+const ADD_CUBE = 'ADD_CUBE';
+function addCubeAction(newcubeid)
+{
+  return {
+    type: ADD_CUBE,
+    cubeid: newcubeid
+  };
+}
+//
 // 2. remove a specific cube, specified by the cube id
+const REMOVE_CUBE = 'REMOVE_CUBE';
+function removeCubeAction(id) {
+  return {
+    type: REMOVE_CUBE,
+    cubeid: id
+  };
+}
+
 //
+// 3. resize the allow space in which to place cubes
+const RESIZE_SPACE = 'RESIZE_SPACE';
+function resizeSpaceAction(xsize, ysize, zsize)
+{
+  return {
+    type: RESIZE_SPACE,
+    newspace: {xsize,ysize,zsize}
+  };
+}
 
-
-// the mounted instance will go here, so that callbacks can modify/set it
-var g_reactinstance;
-
-// This basically the 'application state':
-// a list of all the current sprites
-var g_applicationstate = {};
-
+// when adding a cube we need to generate a unique id which
+// can't be done in the reducer, so the id is generated here and passed in
 var g_nextcubeid = 1;
-
-// if the application state is modified call this to update the GUI
+function createAddCubeAction() {
+  return addCubeAction(g_nextcubeid++);
+}
 
 //
-// callback which adds a randomly placed cube to the application state
+// function which adds a randomly placed cube to the application state
 //
 
 function randomradian() {
   return Math.random() * Math.PI;
 }
 
-function addRandomCube() {
-  // give each sprite a unique ID
-  var refnumber = g_nextcubeid++;
-  var cubeid = 'cube' + refnumber.toString();
+function addRandomCube(state, newcubeid) {
+  var cubeid = 'cube' + newcubeid.toString();
+  var {xsize, ysize, zsize} = state.viewspace;
 
   var newcube = {
     position: new THREE.Vector3(
-      (Math.random() - 0.5) * g_applicationstate.xsize,
-      (Math.random() - 0.5) * g_applicationstate.ysize,
-      (Math.random() - 0.5) * g_applicationstate.zsize
+      (Math.random() - 0.5) * xsize,
+      (Math.random() - 0.5) * ysize,
+      (Math.random() - 0.5) * zsize
     ),
     quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(randomradian(), randomradian(), randomradian(),'XYZ')),
     materialname: g_assetpath('lollipopGreen.png'),
@@ -56,22 +80,51 @@ function addRandomCube() {
     name: cubeid
   };
 
-  g_applicationstate.cubes.push(newcube);
+  // should probs use immutable.js...
+  var newcubes = _.clone(state.cubes);
+  newcubes.push(newcube);
 
-  // update and re-render
-  renderApp();
+  return Object.assign({}, state, {
+    cubes: newcubes
+  });
 }
 
 //
-// callback to remove the dynamic cube that was clicked on
+// function to delete the specified cube
 //
 
-function removeCubeById(cubeid) {
+function removeCubeByID(state, cubeid) {
   var isthecube = function(cube) { return cube.key === cubeid; };
-  _.remove(g_applicationstate.cubes, isthecube);
 
-  renderApp();
-}
+  var newcubes = _.clone(state.cubes);
+  _.remove(newcubes, isthecube);
+
+  return Object.assign({}, state, {
+    cubes: newcubes
+  });
+};
+
+const InitialState = {
+  cubes: [],
+  viewspace: {xsize:500, ysize:500, zsize:500},
+  borderpx: 1
+};
+
+function r3testApp(state = InitialState, action)
+{
+  switch (action.type) {
+  case ADD_CUBE:
+    return addRandomCube(state, action.cubeid);
+  case REMOVE_CUBE:
+    return removeCubeByID(state, action.cubeid);
+  case RESIZE_SPACE:
+    return Object.assign({}, state, {
+      viewspace: action.newspace
+    });
+  default:
+    return state;
+  }
+};
 
 //
 // React Components follow
@@ -101,20 +154,20 @@ function lookupmaterial(materialname) {
   return newmaterial;
 }
 
-var ClickableCube = React.createClass({
+var ClickableCube = createClass({
   displayName: 'ClickableCube',
   propTypes: {
-    position: React.PropTypes.instanceOf(THREE.Vector3),
-    quaternion: React.PropTypes.instanceOf(THREE.Quaternion),
-    materialname: React.PropTypes.string.isRequired,
-    shared: React.PropTypes.bool,
+    position: PropTypes.instanceOf(THREE.Vector3),
+    quaternion: PropTypes.instanceOf(THREE.Quaternion),
+    materialname: PropTypes.string.isRequired,
+    shared: PropTypes.bool
   },
   render: function() {
     var boxmaterial = lookupmaterial(this.props.materialname);
     var cubeprops = _.clone(this.props);
     cubeprops.geometry = boxgeometry;
     cubeprops.material = boxmaterial;
-    return React.createElement(ReactTHREE.Mesh, cubeprops);
+    return createElement(Mesh, cubeprops);
   }
 });
 
@@ -122,58 +175,59 @@ var ClickableCube = React.createClass({
 // A cube that, when clicked, removes itself from the application state
 //
 
-var ClickToRemoveCube = React.createClass({
+var ClickToRemoveCube = createClass({
   displayName: 'ClickToRemoveCube',
   removeThisCube: function(event, intersection) {
     var cubeid = intersection.object.name;
-    removeCubeById(cubeid);
+    this.props.dispatch(removeCubeAction(cubeid));
   },
   render: function() {
     var cubeprops = _.clone(this.props);
     cubeprops.materialname = 'lollipopGreen.png';
-    cubeprops.onPick = this.removeThisCube;
-    return React.createElement(ClickableCube,cubeprops);
+    cubeprops.onClick3D = this.removeThisCube;
+    return createElement(ClickableCube,cubeprops);
   }
 });
-
+ClickToRemoveCube = connect()(ClickToRemoveCube);
 
 //
 // Component that represents an add button. click on this 'button' (really a cube) to add a cube to the scene
 //
-
-var CubeAppButtons = React.createClass({
+var CubeAppButtons = createClass({
   displayName:'CubeAppButtons',
   propTypes: {
   },
-  handlePick: function(/*event, intersection*/) {
-    addRandomCube();
+  handleClick: function(/*event, intersection*/) {
+    this.props.dispatch(createAddCubeAction());
   },
   render: function() {
-    return React.createElement(ReactTHREE.Object3D,
-			       {},
-			       React.createElement(ClickableCube,
-						   {position: new THREE.Vector3(0,0,0), materialname:'cherry.png', name:'addbutton', onPick:this.handlePick})
+    return createElement(Object3D,
+			 {},
+			 createElement(ClickableCube,
+				       {position: new THREE.Vector3(0,0,0), materialname:'cherry.png', name:'addbutton', onClick3D:this.handleClick})
     );
   }
 });
+// hook into react-redux
+CubeAppButtons = connect()(CubeAppButtons)
 
 //
 // Component to display all the dynamically added cubes. All we do is
 // generate a ClickableCube component for each entry in the 'cubes' property.
 //
 
-var RemovableCubes = React.createClass({
+var RemovableCubes = createClass({
   displayName:'RemoveableCubes',
   propTypes: {
-    cubes: React.PropTypes.arrayOf(React.PropTypes.object)
+    cubes: PropTypes.arrayOf(PropTypes.object).isRequired
   },
   render: function() {
     // props for the Object3D containing the cubes. You could change these
     // props to translate/rotate/scale the whole group of cubes at once
     var containerprops = {};
-    var args = [ReactTHREE.Object3D, containerprops];
-    _.forEach(this.props.cubes, function(cube) { args.push(React.createElement(ClickToRemoveCube,cube));});
-    return React.createElement.apply(null,args);
+    var args = [Object3D, containerprops];
+    _.forEach(this.props.cubes, function(cube) { args.push(createElement(ClickToRemoveCube,cube));});
+    return createElement.apply(null,args);
   }
 });
 
@@ -184,10 +238,11 @@ var RemovableCubes = React.createClass({
 // - sprites: a list of objects describing all the current sprites containing x,y and image fields
 //
 
-var CubeApp = React.createClass({
+var CubeApp = createClass({
   displayName: 'CubeApp',
   propTypes: {
-    borderpx: React.PropTypes.number.isRequired,
+    cubes: PropTypes.arrayOf(PropTypes.object).isRequired,
+    viewspace: PropTypes.object.isRequired
   },
   getInitialState: function() {
     // base initial size on window size minus border size
@@ -238,29 +293,27 @@ var CubeApp = React.createClass({
     window.removeEventListener('resize',this.state.resizecallback);
   },
   render: function() {
-    return React.createElement(ReactTHREE.Scene,
-      // stage props
-			       {width: this.state.width, height: this.state.height, listenToClick:true, camera:this.state.camera},
-			       // children components are the buttons and the dynamic sprites
-			       React.createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
-			       React.createElement(CubeAppButtons, {key:'gui'})
-			      );
+    return createElement(Scene,
+                         // stage props
+			 {width: this.state.width, height: this.state.height, pointerEvents: ['onClick'], camera:this.state.camera},
+			 // children components are the buttons and the dynamic sprites
+			 createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
+			 createElement(CubeAppButtons, {key:'gui'})
+			);
   }
 });
 
-
-
-function renderApp() {
-  var renderelement = document.getElementById("three-box");
-  React.render(React.createElement(CubeApp,g_applicationstate), renderelement);
-}
-
-
 function r3teststart() {
-
-  g_applicationstate = {borderpx:6, cubes:[], xsize:500, ysize:500, zsize:500 };
-
-  renderApp();
+  let store = createStore(r3testApp);
+  let renderfunc = () =>
+      {
+        let renderelement = document.getElementById("three-box");
+        let app = createElement(CubeApp, store.getState());
+        render(createElement(Provider, {store: store}, app), renderelement);
+//        render(app, renderelement);
+      };
+  store.subscribe(renderfunc);
+  renderfunc();
 }
 
 window.onload = r3teststart;
