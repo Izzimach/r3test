@@ -15,8 +15,8 @@ So first you'll have to clone the redux-devtools repository and build the `next`
 Checkout this repo from git, then
 
 ```
-npm install
 npm install <your local redux-devtools build>
+npm install
 npm run dev
 ```
 
