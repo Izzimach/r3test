@@ -27,11 +27,13 @@ var g_assetpath = function(filename) { return 'assets/' + filename; };
 //
 // 1. add a new randomly-placed cube to the application state
 const ADD_CUBE = 'ADD_CUBE';
-function addCubeAction(newcubeid)
+function addCubeAction(newcubeid, position, quaternion)
 {
   return {
     type: ADD_CUBE,
-    cubeid: newcubeid
+    cubeid: newcubeid,
+    position: position,
+    quaternion: quaternion
   };
 }
 //
@@ -58,32 +60,35 @@ function resizeSpaceAction(xsize, ysize, zsize)
 // when adding a cube we need to generate a unique id which
 // can't be done in the reducer, so the id is generated here and passed in
 var g_nextcubeid = 1;
-function createAddCubeAction() {
-  return addCubeAction(g_nextcubeid++);
-}
-
-//
-// function which adds a randomly placed cube to the application state
-//
-
 function randomradian() {
   return Math.random() * Math.PI;
 }
-
-function addRandomCube(state, newcubeid) {
-  var cubeid = 'cube' + newcubeid.toString();
-  var {xsize, ysize, zsize} = state.viewspace;
-
-  var newcube = {
-    position: new THREE.Vector3(
+function createRandomAddCubeAction(viewspace) {
+  let {xsize, ysize, zsize} = viewspace;
+  let position = new THREE.Vector3(
       (Math.random() - 0.5) * xsize,
       (Math.random() - 0.5) * ysize,
       (Math.random() - 0.5) * zsize
-    ),
-    quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(randomradian(), randomradian(), randomradian(),'XYZ')),
+  );
+  let quaternion= new THREE.Quaternion().setFromEuler(new THREE.Euler(randomradian(), randomradian(), randomradian(),'XYZ'));
+
+  return addCubeAction(g_nextcubeid++, position, quaternion);
+}
+
+//
+// add a cube to the state
+//
+
+function addCube(state, action) {
+  let { cubeid, position, quaternion} = action;
+  var cubeidstring = 'cube' + cubeid.toString();
+
+  var newcube = {
+    position: position,
+    quaternion: quaternion,
     materialname: g_assetpath('lollipopGreen.png'),
-    key: cubeid,
-    name: cubeid
+    key: cubeidstring,
+    name: cubeidstring
   };
 
   // should probs use immutable.js...
@@ -95,7 +100,7 @@ function addRandomCube(state, newcubeid) {
 }
 
 //
-// function to delete the specified cube
+// delete the specified cube from teh state
 //
 
 function removeCubeByID(state, cubeid) {
@@ -112,7 +117,7 @@ function r3testApp(state = InitialState, action)
 {
   switch (action.type) {
   case ADD_CUBE:
-    return addRandomCube(state, action.cubeid);
+    return addCube(state, action);
   case REMOVE_CUBE:
     return removeCubeByID(state, action.cubeid);
   case RESIZE_SPACE:
@@ -137,6 +142,8 @@ function r3testApp(state = InitialState, action)
 //
 
 var boxgeometry = new THREE.BoxGeometry(200,200,200);
+var cyclopsgeometry = {};
+var cyclopsmaterial = {};
 
 var boxmaterialcache = [];
 function lookupmaterial(materialname) {
@@ -165,6 +172,9 @@ var ClickableCube = createClass({
     var cubeprops = _.clone(this.props);
     cubeprops.geometry = boxgeometry;
     cubeprops.material = boxmaterial;
+    //cubeprops.geometry = cyclopsgeometry;
+    //cubeprops.material = cyclopsmaterial;
+    //cubeprops.scale = 30;
     return createElement(Mesh, cubeprops);
   }
 });
@@ -196,7 +206,7 @@ var CubeAppButtons = createClass({
   propTypes: {
   },
   handleClick: function(/*event, intersection*/) {
-    this.props.dispatch(createAddCubeAction());
+    this.props.dispatch(createRandomAddCubeAction(this.props.viewspace));
   },
   render: function() {
     return createElement(Object3D,
@@ -207,7 +217,7 @@ var CubeAppButtons = createClass({
   }
 });
 // hook into react-redux
-CubeAppButtons = connect()(CubeAppButtons)
+CubeAppButtons = connect((state) => { return {viewspace:state.viewspace};})(CubeAppButtons)
 
 //
 // Component to display all the dynamically added cubes. All we do is
@@ -363,4 +373,17 @@ function r3teststart() {
   renderfunc();
 }
 
-window.onload = r3teststart;
+function preloaddata() {
+  var loader = new THREE.JSONLoader();
+  loader.load(
+    g_assetpath('grumpycyclops.json'),
+    function (geometry, materials) {
+      cyclopsgeometry = geometry;
+      var texturemap = THREE.ImageUtils.loadTexture( g_assetpath('grumpycyclops_diffuse.png') );
+      cyclopsmaterial = new THREE.MeshBasicMaterial( { map: texturemap } );
+      r3teststart();
+    }
+  );
+}
+
+window.onload = preloaddata;
