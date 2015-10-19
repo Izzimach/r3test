@@ -23,7 +23,7 @@
     "react": "0.14.0",
     "react-dom": "0.14.0",
     "react-redux": "^4.0.0",
-    "react-three": "file:../react-three",
+    "react-three": "../react-three",
     "redux": "^3.0.2",
     "three": "^0.72.0"
   },
@@ -34,14 +34,18 @@
     "babel-runtime": "^5.8.20",
     "eslint": "^1.4.0",
     "lodash": "^3.3.1",
-    "webpack": "^1.12.1",
+    "react-hot-loader": "^1.3.0",
     "redux-devtools": "../redux-devtools",
+    "redux-devtools-dock-monitor": "^1.0.0-beta-3",
+    "redux-devtools-log-monitor": "^1.0.0-beta-3",
+    "redux-thunk": "^1.0.0",
+    "webpack": "^1.12.1",
     "webpack-dev-server": "^1.10.1"
   },
   "scripts": {
     "build": "webpack",
     "lint": "eslint src",
-    "dev": "webpack-dev-server --progress --colors"
+    "dev": "node devServer.js"
   },
   "eslintConfig": {
     "extends": "eslint:recommended",
@@ -55,7 +59,9 @@
       "spread": true
     },
     "rules": {
-      "strict": [0]
+      "strict": [
+        0
+      ]
     }
   },
   "engines": {

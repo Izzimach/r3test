@@ -10,8 +10,14 @@ import { render, Mesh, Object3D, Scene } from 'react-three';
 var ReactTHREE = require('react-three');
 var THREE = require('three');
 
-import { createStore } from 'redux';
+import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider, connect } from 'react-redux';
+// Redux DevTools
+import { createDevTools, persistState } from 'redux-devtools';
+import thunk from 'redux-thunk';
+import LogMonitor from 'redux-devtools-log-monitor';
+import DockMonitor from 'redux-devtools-dock-monitor';
+
 
 var g_assetpath = function(filename) { return 'assets/' + filename; };
 
@@ -81,8 +87,7 @@ function addRandomCube(state, newcubeid) {
   };
 
   // should probs use immutable.js...
-  var newcubes = _.clone(state.cubes);
-  newcubes.push(newcube);
+  var newcubes = [...state.cubes, newcube];
 
   return Object.assign({}, state, {
     cubes: newcubes
@@ -96,18 +101,11 @@ function addRandomCube(state, newcubeid) {
 function removeCubeByID(state, cubeid) {
   var isthecube = function(cube) { return cube.key === cubeid; };
 
-  var newcubes = _.clone(state.cubes);
-  _.remove(newcubes, isthecube);
+  var newcubes = _.reject(state.cubes, isthecube);
 
   return Object.assign({}, state, {
     cubes: newcubes
   });
-};
-
-const InitialState = {
-  cubes: [],
-  viewspace: {xsize:500, ysize:500, zsize:500},
-  borderpx: 1
 };
 
 function r3testApp(state = InitialState, action)
@@ -303,13 +301,62 @@ var CubeApp = createClass({
   }
 });
 
+let devTools = createDevTools(
+  createElement(DockMonitor,
+                {toggleVisibilityKey:'H', changePositionKey:'Q'},
+                createElement(LogMonitor))
+);
+let devWindow = createElement(devTools);
+var rootComponent = createClass({
+  displayName:'Root',
+  render: function() {
+    let store = this.props;
+    let app = createElement(CubeApp, store.getState());
+    return createElement(Provider,
+                         {store:store},
+                         createElement("div", {},
+                                       app,
+                                       devWindow));
+  }
+});
+
+const InitialState = {
+  cubes: [],
+  viewspace: {xsize:500, ysize:500, zsize:500},
+  borderpx: 1
+};
+
+function setupStore()
+{
+  let createStoreWithDevTools = compose(
+    applyMiddleware(thunk),
+    devTools.instrument(),
+    persistState(
+      window.location.href.match(
+          /[?&]debug_session=([^&]+)\b/
+      )
+    )
+  )(createStore);
+
+  let store = createStoreWithDevTools(
+    r3testApp,
+    InitialState);
+
+  // eventually allow for hot reload of the reducer(s)
+/*  if (module.hot) {
+    module.hot.accept('../reducers', () =>
+                      store.replaceReducer(require('../reducers')));
+  }*/
+
+  return store;
+}
+
 function r3teststart() {
-  let store = createStore(r3testApp);
+  let store = setupStore();
   let renderfunc = () =>
       {
         let renderelement = document.getElementById("three-box");
-        let app = createElement(CubeApp, store.getState());
-        render(createElement(Provider, {store: store}, app), renderelement);
+        render(createElement(rootComponent, store), renderelement);
 //        render(app, renderelement);
       };
   store.subscribe(renderfunc);
