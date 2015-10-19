@@ -172,9 +172,9 @@ var ClickableCube = createClass({
     var cubeprops = _.clone(this.props);
     cubeprops.geometry = boxgeometry;
     cubeprops.material = boxmaterial;
-    //cubeprops.geometry = cyclopsgeometry;
-    //cubeprops.material = cyclopsmaterial;
-    //cubeprops.scale = 30;
+    cubeprops.geometry = cyclopsgeometry;
+    cubeprops.material = cyclopsmaterial;
+    cubeprops.scale = 30;
     return createElement(Mesh, cubeprops);
   }
 });
