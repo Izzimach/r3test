@@ -29,13 +29,13 @@ import DockMonitor from 'redux-devtools-dock-monitor';
 // setup devtools
 //
 
-let devTools = createDevTools(
+let DevTools = createDevTools(
   createElement(DockMonitor,
-                {toggleVisibilityKey:'H', changePositionKey:'Q'},
+                { toggleVisibilityKey : 'H', changePositionKey : 'Q'},
                 createElement(LogMonitor))
 );
-let devWindow = createElement(devTools);
-var rootComponent = createClass({
+let devWindow = createElement(DevTools);
+var RootComponent = createClass({
   displayName:'Root',
   render: function() {
     let store = this.props.store;
@@ -52,7 +52,7 @@ function setupStore()
 {
   let createStoreWithDevTools = compose(
     applyMiddleware(thunk),
-    devTools.instrument(),
+    DevTools.instrument(),
     persistState(
       window.location.href.match(
           /[?&]debug_session=([^&]+)\b/
@@ -78,7 +78,7 @@ function r3teststart() {
   let renderfunc = () =>
       {
         let renderelement = document.getElementById("three-box");
-        render(createElement(rootComponent, {store:store}), renderelement);
+        render(createElement(RootComponent, {store:store}), renderelement);
       };
   store.subscribe(renderfunc);
   renderfunc();
