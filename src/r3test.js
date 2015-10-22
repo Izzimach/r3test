@@ -88,7 +88,7 @@ function preloaddata() {
   let loader = new THREE.JSONLoader();
   loader.load(
     assetPath('jellyfish.json'),
-    function (geometry, materials) {
+    function (geometry /*, materials*/) {
       assetCache.cyclopsGeometry = geometry;
       let texturemap = THREE.ImageUtils.loadTexture( assetPath('jellyfish_diffuse.png') );
       assetCache.cyclopsMaterial = new THREE.MeshBasicMaterial( { map: texturemap } );

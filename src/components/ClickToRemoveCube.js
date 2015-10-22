@@ -8,22 +8,25 @@ import ClickableCube from './ClickableCube';
 // A cube that, when clicked, removes itself from the application state
 //
 
-var ClickToRemoveCube = createClass({
+let ClickToRemoveCube = createClass({
   displayName: 'ClickToRemoveCube',
   removeThisCube: function(event, intersection) {
-    var cubeid = intersection.object.name;
+    let cubeid = intersection.object.name;
     this.props.dispatch(removeCubeAction(cubeid));
   },
   render: function() {
-    var cubeprops = _.clone(this.props);
-    cubeprops.materialname = 'lollipopGreen.png';
-    cubeprops.onClick3D = this.removeThisCube;
+    let cubeprops = Object.assign({}, this.props, {
+      materialname: 'lollipopGreen.png',
+      onClick3D: this.removeThisCube
+    });
     return createElement(ClickableCube,cubeprops);
   }
 });
 
-var ClickToRemoveCubeWithRedux = connect()(ClickToRemoveCube);
+let ClickToRemoveCubeWithRedux = connect()(ClickToRemoveCube);
 
 export default ClickToRemoveCubeWithRedux;
+
+
 
 

@@ -1,5 +1,6 @@
 import { createClass, createElement, PropTypes } from 'react';
 import { assetPath, assetCache } from '../assets.js';
+import { find } from 'lodash';
 import * as THREE from 'three';
 import { Mesh } from 'react-three';
 
@@ -14,7 +15,7 @@ var boxgeometry = new THREE.BoxGeometry(10,10,10);
 
 var boxmaterialcache = [];
 function lookupmaterial(materialname) {
-  var material = _.find(boxmaterialcache, function(x) { return x.name === materialname;});
+  var material = find(boxmaterialcache, function(x) { return x.name === materialname;});
   if (typeof material !== "undefined") { return material; }
 
   // not found. create a new material for the given texture
@@ -36,12 +37,13 @@ export var ClickableCube = createClass({
   },
   render: function() {
     var boxmaterial = lookupmaterial(this.props.materialname);
-    var cubeprops = _.clone(this.props);
-//    cubeprops.geometry = boxgeometry;
-//    cubeprops.material = boxmaterial;
-    cubeprops.geometry = assetCache['cyclopsGeometry'];
-    cubeprops.material = assetCache['cyclopsMaterial'];
-    cubeprops.scale = 30;
+    var cubeprops = Object.assign({}, this.props, {
+      geometry: boxgeometry,
+      material: boxmaterial,
+      //geometry: assetCache['cyclopsGeometry'],
+      //material: assetCache['cyclopsMaterial'],
+      scale: 3
+    });
     return createElement(Mesh, cubeprops);
   }
 });

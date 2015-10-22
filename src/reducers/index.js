@@ -1,6 +1,7 @@
 
 import { ADD_CUBE, REMOVE_CUBE, RESIZE_SPACE } from '../store/actions.js'
 import { assetPath } from '../assets.js'
+import { reject } from 'lodash';
 
 //
 // add a cube to the state
@@ -33,12 +34,12 @@ function addCube(state, action) {
 function removeCubeByID(state, cubeid) {
   var isthecube = function(cube) { return cube.key === cubeid; };
 
-  var newcubes = _.reject(state.cubes, isthecube);
+  var newcubes = reject(state.cubes, isthecube);
 
   return Object.assign({}, state, {
     cubes: newcubes
   });
-};
+}
 
 const InitialState = {
   cubes: [],
@@ -61,4 +62,4 @@ export function r3testApp(state = InitialState, action)
   default:
     return state;
   }
-};
+}

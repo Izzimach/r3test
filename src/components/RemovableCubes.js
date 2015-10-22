@@ -17,8 +17,8 @@ var RemovableCubes = createClass({
     // props for the Object3D containing the cubes. You could change these
     // props to translate/rotate/scale the whole group of cubes at once
     var containerprops = {};
-    var args = [Object3D, containerprops];
-    _.forEach(this.props.cubes, function(cube) { args.push(createElement(ClickToRemoveCube,cube));});
+    var cubeelements = this.props.cubes.map((cube) => { return createElement(ClickToRemoveCube, cube);});
+    var args = [ Object3D, containerprops, ...cubeelements ];
     return createElement.apply(null,args);
   }
 });

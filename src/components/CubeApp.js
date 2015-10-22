@@ -1,12 +1,9 @@
 import { createClass, createElement, PropTypes } from 'react';
-import { render, Mesh, Object3D, Scene } from 'react-three';
+import { Scene } from 'react-three';
 import * as THREE from 'three';
 
-import ClickableCube from './ClickableCube';
 import ClickToAddCube from './ClickToAddCube';
-import ClickToRemoveCube from './ClickToRemoveCube';
 import RemovableCubes from './RemovableCubes';
-
 
 //
 // The top level component
@@ -72,11 +69,11 @@ var CubeApp = createClass({
   render: function() {
     return createElement(Scene,
                          // stage props
-			 {width: this.state.width, height: this.state.height, pointerEvents: ['onClick'], camera:this.state.camera},
-			 // children components are the buttons and the dynamic sprites
-			 createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
-			 createElement(ClickToAddCube, {key:'gui'})
-			);
+                         {width: this.state.width, height: this.state.height, pointerEvents: ['onClick'], camera:this.state.camera},
+                         // children components are the buttons and the dynamic sprites
+                         createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
+                         createElement(ClickToAddCube, {key:'gui'})
+                        );
   }
 });
 
