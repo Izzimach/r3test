@@ -20,8 +20,8 @@
   "main": "r3test.js",
   "dependencies": {
     "fbjs": "^0.2.1",
-    "react": "0.14.0",
-    "react-dom": "0.14.0",
+    "react": "0.14.2",
+    "react-dom": "0.14.2",
     "react-redux": "^4.0.0",
     "react-three": "^0.7.2",
     "redux": "^3.0.2",
@@ -36,6 +36,7 @@
     "eslint-plugin-react": "^3.6.3",
     "lodash": "^3.3.1",
     "react-hot-loader": "^1.3.0",
+    "redux-devtools": "^3.0.0-beta-3",
     "redux-devtools-dock-monitor": "^1.0.0-beta-3",
     "redux-devtools-log-monitor": "^1.0.0-beta-3",
     "redux-thunk": "^1.0.0",
