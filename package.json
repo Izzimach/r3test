@@ -23,7 +23,7 @@
     "react": "0.14.2",
     "react-dom": "0.14.2",
     "react-redux": "^4.0.0",
-    "react-three": "^0.7.2",
+    "react-three": "^0.7.3",
     "redux": "^3.0.2",
     "three": "^0.72.0"
   },
