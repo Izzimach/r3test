@@ -8,14 +8,9 @@ along with its devtools for hot reload and history editing.
 
 ## Running the example
 
-Right now this demo requires the `next` branch of [redux-devtools](https://github.com/gaearon/redux-devtools).
-
-So first you'll have to clone the redux-devtools repository and build the `next` branch.
-
 Checkout this repo from git, then
 
 ```
-npm install <your local redux-devtools build>
 npm install
 npm run dev
 ```
