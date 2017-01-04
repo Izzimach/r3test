@@ -1,5 +1,5 @@
 import { createClass, createElement, PropTypes } from 'react';
-import { Scene } from 'react-three';
+import { Scene, Renderer } from 'react-three';
 import * as THREE from 'three';
 
 import ClickToAddCube from './ClickToAddCube';
@@ -67,12 +67,15 @@ var CubeApp = createClass({
     window.removeEventListener('resize',this.state.resizecallback);
   },
   render: function() {
-    return createElement(Scene,
-                         // stage props
-                         {width: this.state.width, height: this.state.height, pointerEvents: ['onClick'], camera:this.state.camera},
-                         // children components are the buttons and the dynamic sprites
-                         createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
-                         createElement(ClickToAddCube, {key:'gui'})
+    return createElement(Renderer,
+                         {width: this.state.width, height:this.state.height},
+                         createElement(Scene,
+                                       // stage props
+                                       {width: this.state.width, height: this.state.height, pointerEvents: ['onClick'], camera:this.state.camera},
+                                       // children components are the buttons and the dynamic sprites
+                                       createElement(RemovableCubes, {key:'cubes', cubes:this.props.cubes}),
+                                       createElement(ClickToAddCube, {key:'gui'})
+                                      )
                         );
   }
 });
