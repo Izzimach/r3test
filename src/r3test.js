@@ -20,21 +20,12 @@ import { Provider } from 'react-redux';
 
 // Redux DevTools
 
-import { createDevTools, persistState } from 'redux-devtools';
 import thunk from 'redux-thunk';
-import LogMonitor from 'redux-devtools-log-monitor';
-import DockMonitor from 'redux-devtools-dock-monitor';
 
 //
 // setup devtools
 //
 
-let DevTools = createDevTools(
-  createElement(DockMonitor,
-                { toggleVisibilityKey : 'H', changePositionKey : 'Q'},
-                createElement(LogMonitor))
-);
-let devWindow = createElement(DevTools);
 var RootComponent = createClass({
   displayName:'Root',
   render: function() {
@@ -42,33 +33,17 @@ var RootComponent = createClass({
     let app = createElement(CubeApp, store.getState());
     return createElement(Provider,
                          {store:store},
-                         createElement("div", {},
-                                       app,
-                                       devWindow));
+                         app);
   }
 });
 
 function setupStore()
 {
-  let createStoreWithDevTools = compose(
-    applyMiddleware(thunk),
-    DevTools.instrument(),
-    persistState(
-      window.location.href.match(
-          /[?&]debug_session=([^&]+)\b/
-      )
-    )
-  )(createStore);
-
-  let store = createStoreWithDevTools(
+  const store = createStore(
     r3testApp,
-    InitialState);
-
-  // eventually allow for hot reload of the reducer(s)
-  if (module.hot) {
-    module.hot.accept('./reducers', () =>
-                      store.replaceReducer(require('./reducers/index')));
-  }
+    InitialState,
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  );
 
   return store;
 }
