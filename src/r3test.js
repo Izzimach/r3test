@@ -62,10 +62,10 @@ function r3teststart() {
 function preloaddata() {
   let loader = new THREE.JSONLoader();
   loader.load(
-    assetPath('jellyfish.json'),
+    assetPath('grumpycyclops.json'),
     function (geometry /*, materials*/) {
       assetCache.cyclopsGeometry = geometry;
-      let texturemap = THREE.ImageUtils.loadTexture( assetPath('jellyfish_diffuse.png') );
+      let texturemap = THREE.ImageUtils.loadTexture( assetPath('grumpycyclops_diffuse.png') );
       assetCache.cyclopsMaterial = new THREE.MeshBasicMaterial( { map: texturemap } );
       r3teststart();
     }
